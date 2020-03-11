@@ -1,19 +1,24 @@
 package me.onebone.masklog.telegram
 
-import org.telegram.telegrambots.extensions.bots.commandbot.commands.DefaultBotCommand
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage
-import org.telegram.telegrambots.meta.api.objects.Chat
-import org.telegram.telegrambots.meta.api.objects.User
+import me.onebone.masklog.MaskBot
+import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
 
-class RegisterCommand: DefaultBotCommand(
+class RegisterCommand(
+	private val bot: MaskBot
+): ReplyableBotCommand(
 	"register", "Registers notifier for mask entry"
 ) {
-	override fun execute(sender: AbsSender, user: User, chat: Chat, messageId: Int, args: Array<out String>) {
-		val reply = SendMessage(chat.id.toString(), "Hello World").apply {
-			replyToMessageId = messageId
+	override fun execute(sender: AbsSender, message: Message, args: Array<out String>): String? {
+		if(args.isEmpty()) {
+			return "명령어: /register <알림을 받을 주소>"
 		}
 
-		sender.execute(reply)
+		val location = args.joinToString(" ").trim()
+		return if(this.bot.registerLocation(location, message.from.id, message.chat.id)) {
+			"주소(${location})가 등록되었습니다. 마스크의 재고에 변화가 있을 경우 이곳에 메시지를 보냅니다."
+		}else{
+			"이미 해당 주소를 등록했습니다."
+		}
 	}
 }

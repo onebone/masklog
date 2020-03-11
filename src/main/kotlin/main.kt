@@ -1,6 +1,5 @@
 package me.onebone.masklog
 
-import com.squareup.moshi.JsonReader
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.telegram.telegrambots.ApiContextInitializer
@@ -28,7 +27,7 @@ fun main() {
 
 	val api = TelegramBotsApi()
 	try{
-		api.registerBot(CommandHandler(config.token))
+		api.registerBot(MaskBot(config.token))
 	}catch(e: TelegramApiException) {
 		e.printStackTrace()
 	}
