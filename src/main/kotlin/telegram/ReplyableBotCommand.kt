@@ -11,9 +11,11 @@ abstract class ReplyableBotCommand(
 	commandIdentifier: String, description: String
 ): DefaultBotCommand(commandIdentifier, description) {
 	override fun processMessage(sender: AbsSender, message: Message, arguments: Array<out String>) {
-		val reply = execute(sender, message, arguments) ?: return
+		replyMessage(sender, message, execute(sender, message, arguments) ?: return)
+	}
 
-		sender.execute(SendMessage(message.chat.id, reply).apply {
+	fun replyMessage(sender: AbsSender, message: Message, text: String) {
+		sender.execute(SendMessage(message.chat.id, text).apply {
 			replyToMessageId = message.messageId
 		})
 	}

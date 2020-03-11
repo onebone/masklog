@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException
 import java.io.File
 import java.io.FileOutputStream
 
-const val API_URI = "https://8oi9s0nnth.apigw.ntruss.com/corona19-masks/v1/sales/json"
+const val API_URI = "https://8oi9s0nnth.apigw.ntruss.com/corona19-masks/v1/storesByAddr/json"
 
 fun main() {
 	if(!File("config.json").exists()) {

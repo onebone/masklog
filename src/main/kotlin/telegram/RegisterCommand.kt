@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.bots.AbsSender
 class RegisterCommand(
 	private val bot: MaskBot
 ): ReplyableBotCommand(
-	"register", "Registers notifier for mask entry"
+	"register", "마스크 재고 입점이 생겼을 때 알림을 받도록 등록합니다."
 ) {
 	override fun execute(sender: AbsSender, message: Message, args: Array<out String>): String? {
 		if(args.isEmpty()) {
