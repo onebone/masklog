@@ -24,6 +24,7 @@ class MaskBot (
 	private val token: String
 ): TelegramLongPollingCommandBot(), CoroutineScope {
 	private val data: MutableList<RegisteredLocation>
+	private val lastStoreData: MutableList<Store>
 	private val queues: MutableList<Queue> = mutableListOf()
 
 	private val job = Job()
@@ -33,11 +34,12 @@ class MaskBot (
 	init {
 		println("Starting bot with username: @${this.me.userName}")
 
+		val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+
 		val dataFile = File("data.json")
 		if(!dataFile.exists()) {
 			this.data = mutableListOf()
 		}else{
-			val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 			val type = Types.newParameterizedType(MutableList::class.java, RegisteredLocation::class.java)
 			val adapter = moshi.adapter<MutableList<RegisteredLocation>>(type)
 
@@ -47,6 +49,14 @@ class MaskBot (
 		val saveFolder = File("saves")
 		if(!saveFolder.exists()) {
 			saveFolder.mkdir()
+		}
+
+		val lastStoresFolder = File("stores.json")
+		if(!lastStoresFolder.exists()) {
+			this.lastStoreData = mutableListOf()
+		}else{
+			val adapter = moshi.adapter<MutableList<Store>>(Types.newParameterizedType(MutableList::class.java, Store::class.java))
+			this.lastStoreData = adapter.fromJson(lastStoresFolder.readText())!!
 		}
 
 		register(RegisterCommand(this))
@@ -111,6 +121,14 @@ class MaskBot (
 		dataFile.writeText(json)
 	}
 
+	private fun saveStores() {
+		val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+		val adapter = moshi.adapter<MutableList<Store>>(Types.newParameterizedType(MutableList::class.java, Store::class.java))
+
+		val dataFile = File("stores.json")
+		dataFile.writeText(adapter.toJson(this.lastStoreData))
+	}
+
 	fun addQueue(queue: Queue) {
 		this.queues.add(queue)
 	}
@@ -129,22 +147,60 @@ class MaskBot (
 	private suspend fun fetchApi(save: Boolean = true) = coroutineScope {
 		this@MaskBot.data.forEach { loc ->
 			launch {
-				 val stores = mutableListOf<Store>()
-				 this@MaskBot.fetchLocation(loc.location).forEach {
+				val stores = mutableListOf<Store>()
+				this@MaskBot.fetchLocation(loc.location).forEach {
 					 stores.add(it)
-				 }
+				}
 
 				if(stores.size > 0) {
-					val availableStores = stores.filter{ it.hasStock() }
-					if(availableStores.isNotEmpty()) {
-						val message = "${loc.location}의 판매소(${availableStores.size}):\n${availableStores.joinToString("\n", transform={it.toString()})}"
+					data class UpdatedStore(val last: Store, val current: Store)
+
+					val updated = mutableListOf<UpdatedStore>()
+					lastStoreData.forEach { last ->
+						stores.find {it.code == last.code }?.let { store ->
+							if (store.remainStat != last.remainStat) {
+								updated.add(UpdatedStore(last, store))
+							}
+						}
+					}
+
+					if(updated.isNotEmpty()) {
+						var message = "${loc.location}의 판매소 재고량 변화(${updated.size}):\n}"
+						message += updated.joinToString("\n", transform = {
+							val typeString = when (it.current.type) {
+								STORE_TYPE_PHARMACY -> "약국"
+								STORE_TYPE_POST_OFFICE -> "우체국"
+								STORE_TYPE_NONGHYUP -> "농협"
+								else -> "매장 종류 불명"
+							}
+
+							val lastRemainString = toRemainStatusString(it.last.remainStat)
+							val remainString = toRemainStatusString(it.current.remainStat)
+
+							"[$typeString] ${it.current.name} (${it.current.addr}): $lastRemainString -> $remainString"
+						})
 
 						loc.users.forEach {
 							this@MaskBot.execute(SendMessage(it.chatId, message))
 						}
 					}
 				}
+
+				stores.forEach(this@MaskBot::updateLastStoreData)
+				this@MaskBot.saveStores()
 			}
+		}
+	}
+
+	private fun findLastStoreData(code: String) =
+		lastStoreData.find { it.code == code }
+
+	private fun updateLastStoreData(store: Store) {
+		val index = lastStoreData.indexOfFirst { store.code == it.code }
+		if(index == -1) {
+			lastStoreData.add(store)
+		}else{
+			lastStoreData[index] = store
 		}
 	}
 

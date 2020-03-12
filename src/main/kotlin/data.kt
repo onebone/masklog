@@ -52,17 +52,20 @@ data class Store (
 			else -> "매장 종류 불명"
 		}
 
-		val remainString = when(remainStat) {
-			REMAIN_EMPTY -> "재고 없음"
-			REMAIN_FEW -> "조금 있음 (2~29개)"
-			REMAIN_SOME -> "꽤 있음 (30~99개)"
-			REMAIN_PLENTY -> "충분함 (100개~)"
-			else -> "재고 불명"
-		}
+		val remainString = toRemainStatusString(remainStat)
 
 		return "[$typeString] $name ($addr): $remainString"
 	}
 }
+
+fun toRemainStatusString(remainStat: String?): String =
+	when(remainStat) {
+		REMAIN_EMPTY -> "재고 없음"
+		REMAIN_FEW -> "조금 있음 (2~29개)"
+		REMAIN_SOME -> "꽤 있음 (30~99개)"
+		REMAIN_PLENTY -> "충분함 (100개~)"
+		else -> "재고 불명"
+	}
 
 data class JsonResponse (
 	val address: String,
