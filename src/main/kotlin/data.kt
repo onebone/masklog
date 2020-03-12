@@ -13,6 +13,8 @@ data class Receiver (
 	val chatId: Long
 )
 
+const val API_URI = "https://8oi9s0nnth.apigw.ntruss.com/corona19-masks/v1/storesByAddr/json"
+
 const val STORE_TYPE_PHARMACY = "01"
 const val STORE_TYPE_POST_OFFICE = "02"
 const val STORE_TYPE_NONGHYUP = "03"
@@ -34,7 +36,13 @@ data class Store (
 	val type: String,
 	val lat: Float,
 	val lng: Float,
-	@Json(name="created_at") val createdAt: Date,
-	@Json(name="remain_stat") val remainStat: Date,
-	@Json(name="stock_at") val stockAt: Date
+	@Json(name="created_at") val createdAt: String?,
+	@Json(name="remain_stat") val remainStat: String?,
+	@Json(name="stock_at") val stockAt: String?
+)
+
+data class JsonResponse (
+	val address: String,
+	val count: Int,
+	val stores: List<Store>
 )
