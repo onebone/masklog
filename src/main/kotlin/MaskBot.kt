@@ -192,9 +192,6 @@ class MaskBot (
 		}
 	}
 
-	private fun findLastStoreData(code: String) =
-		lastStoreData.find { it.code == code }
-
 	private fun updateLastStoreData(store: Store) {
 		val index = lastStoreData.indexOfFirst { store.code == it.code }
 		if(index == -1) {

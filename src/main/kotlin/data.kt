@@ -1,7 +1,6 @@
 package me.onebone.masklog
 
 import com.squareup.moshi.Json
-import java.util.Date
 
 data class RegisteredLocation (
 	val location: String,

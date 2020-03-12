@@ -2,7 +2,6 @@ package me.onebone.masklog.telegram
 
 import me.onebone.masklog.MaskBot
 import me.onebone.masklog.Queue
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
