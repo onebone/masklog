@@ -72,7 +72,7 @@ class MaskBot (
 				launch {
 					fetchApi()
 				}
-			}, 0, 1000 * 60 * 30) // 30 min
+			}, 0, 1000 * 60 * 6) // 6 min
 		}
 
 		Timer().apply {
@@ -80,7 +80,7 @@ class MaskBot (
 				launch {
 					processQueues()
 				}
-			}, 1000 * 10, 1000 * 10)
+			}, 1000 * 5, 1000 * 5)
 		}
 	}
 
