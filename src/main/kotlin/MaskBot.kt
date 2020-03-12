@@ -8,6 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import me.onebone.masklog.telegram.StocksCommand
 import me.onebone.masklog.telegram.RegisterCommand
 import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -49,6 +50,7 @@ class MaskBot (
 		}
 
 		register(RegisterCommand(this))
+		register(StocksCommand(this))
 		registerDefaultAction { sender, message ->
 			sender.execute(SendMessage(message.chatId, "Use /register command").apply {
 				replyToMessageId = message.messageId
@@ -135,7 +137,7 @@ class MaskBot (
 				if(stores.size > 0) {
 					val availableStores = stores.filter{ it.hasStock() }
 					if(availableStores.isNotEmpty()) {
-						val message = "판매소(${availableStores.size}):\n${availableStores.joinToString("\n", transform={it.toString()})}"
+						val message = "${loc.location}의 판매소(${availableStores.size}):\n${availableStores.joinToString("\n", transform={it.toString()})}"
 
 						loc.users.forEach {
 							this@MaskBot.execute(SendMessage(it.chatId, message))

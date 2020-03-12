@@ -13,7 +13,7 @@ class RegisterCommand(
 ) {
 	override fun execute(sender: AbsSender, message: Message, args: Array<out String>): String? {
 		if(args.isEmpty()) {
-			return "명령어: /register <알림을 받을 주소>"
+			return "명령어: /register <알림을 받을 지역>"
 		}
 
 		val location = args.joinToString(" ").trim()
