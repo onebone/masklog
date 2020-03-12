@@ -34,8 +34,8 @@ data class Store (
 	val name: String,
 	val addr: String,
 	val type: String,
-	val lat: Float,
-	val lng: Float,
+	val lat: Float?,
+	val lng: Float?,
 	@Json(name="created_at") val createdAt: String?,
 	@Json(name="remain_stat") val remainStat: String?,
 	@Json(name="stock_at") val stockAt: String?
@@ -45,4 +45,9 @@ data class JsonResponse (
 	val address: String,
 	val count: Int,
 	val stores: List<Store>
+)
+
+data class Queue (
+	val location: String,
+	val callback: (stores: List<Store>) -> Unit
 )

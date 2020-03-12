@@ -29,8 +29,6 @@ class MaskBot (
 	override val coroutineContext: CoroutineContext
 		get() = Dispatchers.Default + job
 
-	private val timer: Timer
-
 	init {
 		println("Starting bot with username: @${this.me.userName}")
 
@@ -57,12 +55,12 @@ class MaskBot (
 			})
 		}
 
-		timer = Timer().apply {
+		Timer().apply {
 			scheduleAtFixedRate(timerTask {
 				launch {
 					fetchApi()
 				}
-			}, 1000 * 60 * 30, 1000 * 60 * 30) // 30 min
+			}, 0, 1000 * 60 * 30) // 30 min
 		}
 
 		Timer().apply {
@@ -86,6 +84,16 @@ class MaskBot (
 			d.users.add(Receiver(userId, chatId))
 			this.save()
 			return true
+		}
+
+		return false
+	}
+
+	fun hasLocation(chatId: Long, location: String): Boolean {
+		data.forEach {
+			if(it.location == location) {
+				return it.users.find { user -> user.chatId == chatId } != null
+			}
 		}
 
 		return false
@@ -127,7 +135,7 @@ class MaskBot (
 				 }
 
 				if(masks.size > 0) {
-					val message = "마스크 재고가 있는 약국:\n${masks.joinToString(", ", transform={it.name})}"
+					val message = "마스크 재고가 있는 판매소:\n${masks.joinToString(", ", transform={it.name})}"
 
 					loc.users.forEach {
 						this@MaskBot.execute(SendMessage(it.chatId, message))

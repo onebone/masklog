@@ -14,8 +14,8 @@ abstract class ReplyableBotCommand(
 		replyMessage(sender, message, execute(sender, message, arguments) ?: return)
 	}
 
-	fun replyMessage(sender: AbsSender, message: Message, text: String) {
-		sender.execute(SendMessage(message.chat.id, text).apply {
+	fun replyMessage(sender: AbsSender, message: Message, text: String): Message {
+		return sender.execute(SendMessage(message.chat.id, text).apply {
 			replyToMessageId = message.messageId
 		})
 	}
