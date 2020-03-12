@@ -113,20 +113,20 @@ class MaskBot (
 
 	private fun save() {
 		val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-		val type = Types.newParameterizedType(MutableList::class.java, RegisteredLocation::class.java)
-		val adapter = moshi.adapter<MutableList<RegisteredLocation>>(type)
+		val type = Types.newParameterizedType(List::class.java, RegisteredLocation::class.java)
+		val adapter = moshi.adapter<List<RegisteredLocation>>(type)
 
-		val json = adapter.toJson(this.data)
+		val json = adapter.toJson(this.data.toList())
 		val dataFile = File("data.json")
 		dataFile.writeText(json)
 	}
 
 	private fun saveStores() {
 		val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-		val adapter = moshi.adapter<MutableList<Store>>(Types.newParameterizedType(MutableList::class.java, Store::class.java))
+		val adapter = moshi.adapter<List<Store>>(Types.newParameterizedType(List::class.java, Store::class.java))
 
 		val dataFile = File("stores.json")
-		dataFile.writeText(adapter.toJson(this.lastStoreData))
+		dataFile.writeText(adapter.toJson(this.lastStoreData.toList()))
 	}
 
 	fun addQueue(queue: Queue) {
