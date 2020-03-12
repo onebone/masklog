@@ -17,7 +17,7 @@ class StocksCommand(private val bot: MaskBot): ReplyableBotCommand(
 		val location = args.joinToString(" ")
 
 		val replied = replyMessage(sender, message, "${location}를 대상으로 재고가 있는 매장을 검색하고 있습니다. 잠시만 기다려주세요...")
-		this.bot.addQueue(Queue(location) {
+		this.bot.addQueue(Queue(location, callback={
 			if(it.isEmpty()) {
 				sender.execute(EditMessageText().apply {
 					chatId = message.chat.id.toString()
@@ -40,7 +40,13 @@ class StocksCommand(private val bot: MaskBot): ReplyableBotCommand(
 					})
 				}
 			}
-		})
+		}, errorCallback={
+			sender.execute(EditMessageText().apply {
+				chatId = message.chat.id.toString()
+				messageId = replied.messageId
+				text = "처리 중 오류가 발생하여 결과를 가져올 수 없습니다. 다시 시도해주세요."
+			})
+		}))
 
 		return null
 	}

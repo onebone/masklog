@@ -74,5 +74,6 @@ data class JsonResponse (
 
 data class Queue (
 	val location: String,
-	val callback: (stores: List<Store>) -> Unit
+	val callback: (stores: List<Store>) -> Unit,
+	val errorCallback: ((e: Exception) -> Unit)? = null
 )

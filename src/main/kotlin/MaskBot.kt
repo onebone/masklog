@@ -136,8 +136,14 @@ class MaskBot (
 	private suspend fun processQueues() = coroutineScope {
 		this@MaskBot.queues.forEach {
 			launch {
-				val list = this@MaskBot.fetchLocation(it.location)
-				it.callback(list)
+				try {
+					val list = this@MaskBot.fetchLocation(it.location)
+					it.callback.invoke(list)
+				}catch(e: Exception) {
+					e.printStackTrace()
+
+					it.errorCallback?.invoke(e)
+				}
 			}
 		}
 
@@ -147,47 +153,51 @@ class MaskBot (
 	private suspend fun fetchApi(save: Boolean = true) = coroutineScope {
 		this@MaskBot.data.forEach { loc ->
 			launch {
-				val stores = mutableListOf<Store>()
-				this@MaskBot.fetchLocation(loc.location).forEach {
-					 stores.add(it)
-				}
+				try{
+					val stores = mutableListOf<Store>()
+					this@MaskBot.fetchLocation(loc.location).forEach {
+						 stores.add(it)
+					}
 
-				if(stores.size > 0) {
-					data class UpdatedStore(val last: Store, val current: Store)
+					if(stores.size > 0) {
+						data class UpdatedStore(val last: Store, val current: Store)
 
-					val updated = mutableListOf<UpdatedStore>()
-					lastStoreData.forEach { last ->
-						stores.find {it.code == last.code }?.let { store ->
-							if (store.remainStat != last.remainStat) {
-								updated.add(UpdatedStore(last, store))
+						val updated = mutableListOf<UpdatedStore>()
+						lastStoreData.forEach { last ->
+							stores.find {it.code == last.code }?.let { store ->
+								if (store.remainStat != last.remainStat) {
+									updated.add(UpdatedStore(last, store))
+								}
+							}
+						}
+
+						if(updated.isNotEmpty()) {
+							var message = "${loc.location}의 판매소 재고량 변화(${updated.size}):\n}"
+							message += updated.joinToString("\n", transform = {
+								val typeString = when (it.current.type) {
+									STORE_TYPE_PHARMACY -> "약국"
+									STORE_TYPE_POST_OFFICE -> "우체국"
+									STORE_TYPE_NONGHYUP -> "농협"
+									else -> "매장 종류 불명"
+								}
+
+								val lastRemainString = toRemainStatusString(it.last.remainStat)
+								val remainString = toRemainStatusString(it.current.remainStat)
+
+								"[$typeString] ${it.current.name} (${it.current.addr}): $lastRemainString -> $remainString"
+							})
+
+							loc.users.forEach {
+								this@MaskBot.execute(SendMessage(it.chatId, message))
 							}
 						}
 					}
 
-					if(updated.isNotEmpty()) {
-						var message = "${loc.location}의 판매소 재고량 변화(${updated.size}):\n}"
-						message += updated.joinToString("\n", transform = {
-							val typeString = when (it.current.type) {
-								STORE_TYPE_PHARMACY -> "약국"
-								STORE_TYPE_POST_OFFICE -> "우체국"
-								STORE_TYPE_NONGHYUP -> "농협"
-								else -> "매장 종류 불명"
-							}
-
-							val lastRemainString = toRemainStatusString(it.last.remainStat)
-							val remainString = toRemainStatusString(it.current.remainStat)
-
-							"[$typeString] ${it.current.name} (${it.current.addr}): $lastRemainString -> $remainString"
-						})
-
-						loc.users.forEach {
-							this@MaskBot.execute(SendMessage(it.chatId, message))
-						}
-					}
+					stores.forEach(this@MaskBot::updateLastStoreData)
+					this@MaskBot.saveStores()
+				}catch(e: Exception) {
+					e.printStackTrace()
 				}
-
-				stores.forEach(this@MaskBot::updateLastStoreData)
-				this@MaskBot.saveStores()
 			}
 		}
 	}

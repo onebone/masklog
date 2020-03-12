@@ -24,7 +24,7 @@ class RegisterCommand(
 
 		val replied = replyMessage(sender, message, "등록 대기 중입니다. 잠시만 기다려주세요.")
 
-		this.bot.addQueue(Queue(location) {
+		this.bot.addQueue(Queue(location, callback={
 			if(it.isNotEmpty()) {
 				if(this.bot.registerLocation(location, message.from.id, message.chat.id)) {
 					sender.execute(EditMessageText().apply {
@@ -41,7 +41,13 @@ class RegisterCommand(
 					text = "해당 주소는 올바르지 않습니다. 시 단위의 입력은 사용할 수 없습니다.\n올바른 사용 예시: 서울특별시 강남구"
 				})
 			}
-		})
+		}, errorCallback={
+			sender.execute(EditMessageText().apply {
+				chatId = message.chat.id.toString()
+				messageId = replied.messageId
+				text = "처리 중 오류가 발생하여 결과를 가져올 수 없습니다. 다시 시도해주세요."
+			})
+		}))
 
 		return null
 	}
