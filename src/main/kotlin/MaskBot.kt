@@ -127,18 +127,19 @@ class MaskBot (
 	private suspend fun fetchApi(save: Boolean = true) = coroutineScope {
 		this@MaskBot.data.forEach { loc ->
 			launch {
-				 val masks = mutableListOf<Store>()
+				 val stores = mutableListOf<Store>()
 				 this@MaskBot.fetchLocation(loc.location).forEach {
-					 if(it.remainStat == REMAIN_PLENTY || it.remainStat == REMAIN_SOME) {
-						 masks.add(it)
-					 }
+					 stores.add(it)
 				 }
 
-				if(masks.size > 0) {
-					val message = "마스크 재고가 있는 판매소:\n${masks.joinToString(", ", transform={it.name})}"
+				if(stores.size > 0) {
+					val availableStores = stores.filter{ it.hasStock() }
+					if(availableStores.isNotEmpty()) {
+						val message = "판매소(${availableStores.size}):\n${availableStores.joinToString("\n", transform={it.toString()})}"
 
-					loc.users.forEach {
-						this@MaskBot.execute(SendMessage(it.chatId, message))
+						loc.users.forEach {
+							this@MaskBot.execute(SendMessage(it.chatId, message))
+						}
 					}
 				}
 			}

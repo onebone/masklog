@@ -39,7 +39,30 @@ data class Store (
 	@Json(name="created_at") val createdAt: String?,
 	@Json(name="remain_stat") val remainStat: String?,
 	@Json(name="stock_at") val stockAt: String?
-)
+) {
+	fun hasStock(): Boolean {
+		return remainStat != REMAIN_EMPTY
+	}
+
+	override fun toString(): String {
+		val typeString = when (type) {
+			STORE_TYPE_PHARMACY -> "약국"
+			STORE_TYPE_POST_OFFICE -> "우체국"
+			STORE_TYPE_NONGHYUP -> "농협"
+			else -> "매장 종류 불명"
+		}
+
+		val remainString = when(remainStat) {
+			REMAIN_EMPTY -> "재고 없음"
+			REMAIN_FEW -> "조금 있음 (2~29개)"
+			REMAIN_SOME -> "꽤 있음 (30~99개)"
+			REMAIN_PLENTY -> "충분함 (100개~)"
+			else -> "재고 불명"
+		}
+
+		return "[$typeString] $name ($addr): $remainString"
+	}
+}
 
 data class JsonResponse (
 	val address: String,
