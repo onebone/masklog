@@ -202,7 +202,7 @@ class MaskBot (
 	}
 
 	private  fun fetchLocation(query: String): List<Store> {
-		val text = URL("$API_URI?address=${URLEncoder.encode(query, Charsets.UTF_8)}").readText()
+		val text = URL("$API_URI?address=${URLEncoder.encode(query, "UTF-8")}").readText()
 		val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 		val response = moshi.adapter<JsonResponse>(Types.newParameterizedType(JsonResponse::class.java, List::class.java, Store::class.java))
 			.fromJson(text) ?: return listOf()

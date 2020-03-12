@@ -30,7 +30,7 @@ class RegisterCommand(
 					sender.execute(EditMessageText().apply {
 						chatId = message.chat.id.toString()
 						messageId = replied.messageId
-						text = "주소(${location})가 등록되었습니다. 해당 도시에는 ${it.size}개의 공적 마스크 판매소가 있습니다." +
+						text = "주소(${location})가 등록되었습니다. 해당 지역에는 ${it.size}개의 공적 마스크 판매소가 있습니다." +
 								" 마스크의 재고에 변화가 있을 경우 이곳에 메시지를 보냅니다."
 					})
 				}
