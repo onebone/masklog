@@ -2,6 +2,11 @@ package me.onebone.masklog.telegram
 
 import me.onebone.masklog.MaskBot
 import me.onebone.masklog.Queue
+import me.onebone.masklog.REMAIN_BREAK
+import me.onebone.masklog.REMAIN_EMPTY
+import me.onebone.masklog.REMAIN_FEW
+import me.onebone.masklog.REMAIN_PLENTY
+import me.onebone.masklog.REMAIN_SOME
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
 import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.bots.AbsSender
@@ -36,7 +41,21 @@ class StocksCommand(private val bot: MaskBot): ReplyableBotCommand(
 					sender.execute(EditMessageText().apply {
 						chatId = message.chat.id.toString()
 						messageId = replied.messageId
-						text = "${location}의 재고 있는 매장(${it.size}곳 중 ${availableStores.size}곳):\n${availableStores.joinToString("\n") { store -> store.toString() }}"
+
+						val plenty = availableStores.filter { store -> store.remainStat == REMAIN_PLENTY }.size
+						val some = availableStores.filter { store -> store.remainStat == REMAIN_SOME }.size
+						val few = availableStores.filter { store -> store.remainStat == REMAIN_FEW }.size
+						val empty = it.filter { store -> store.remainStat == REMAIN_EMPTY }.size
+						val ceased = it.filter { store -> store.remainStat == REMAIN_BREAK }.size
+
+						text = """${location}의 공적 마스크 매장 현황(전체 ${it.size}곳):
+								충분함(100개~): ${plenty}곳
+								꽤 있음(30~99개): ${some}곳
+								조금 있음(2~29개): ${few}곳
+								없음(0~1개): ${empty}곳
+								
+								판매 중지: ${ceased}곳
+							""".trimIndent()
 					})
 				}
 			}

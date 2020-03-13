@@ -26,6 +26,8 @@ const val REMAIN_SOME = "some"
 const val REMAIN_FEW = "few"
 // (gray) 0 <= x < 2
 const val REMAIN_EMPTY = "empty"
+// ceased sale
+const val REMAIN_BREAK = "break"
 
 // https://app.swaggerhub.com/apis-docs/Promptech/public-mask-info/20200307-oas3#/Store
 data class Store (

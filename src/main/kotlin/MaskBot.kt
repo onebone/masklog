@@ -72,7 +72,7 @@ class MaskBot (
 				launch {
 					fetchApi()
 				}
-			}, 0, 1000 * 60 * 6) // 6 min
+			}, 0, 1000 * 60 * 60) // 60 min
 		}
 
 		Timer().apply {
@@ -172,20 +172,22 @@ class MaskBot (
 						}
 
 						if(updated.isNotEmpty()) {
-							var message = "${loc.location}의 판매소 재고량 변화(${updated.size}):\n}"
-							message += updated.joinToString("\n", transform = {
-								val typeString = when (it.current.type) {
-									STORE_TYPE_PHARMACY -> "약국"
-									STORE_TYPE_POST_OFFICE -> "우체국"
-									STORE_TYPE_NONGHYUP -> "농협"
-									else -> "매장 종류 불명"
-								}
+							val plenty = stores.filter { it.remainStat == REMAIN_PLENTY }.size
+							val some = stores.filter { it.remainStat == REMAIN_SOME }.size
+							val few = stores.filter { it.remainStat == REMAIN_FEW }.size
+							val empty = stores.filter { it.remainStat == REMAIN_EMPTY }.size
+							val ceased = stores.filter { it.remainStat == REMAIN_BREAK }.size
+							val updatedEmpty = updated.filter { it.current.remainStat == REMAIN_EMPTY && it.last.remainStat != REMAIN_EMPTY }.size
 
-								val lastRemainString = toRemainStatusString(it.last.remainStat)
-								val remainString = toRemainStatusString(it.current.remainStat)
-
-								"[$typeString] ${it.current.name} (${it.current.addr}): $lastRemainString -> $remainString"
-							})
+							val message = """${loc.location}의 판매소 재고량 변화(${updated.size} 곳 변경):
+								충분함(100개~): ${plenty}곳
+								꽤 있음(30~99개): ${some}곳
+								조금 있음(2~29개): ${few}곳
+								없음(0~1개): ${empty}곳
+								판매 중지: ${ceased}곳
+								
+								최근에 재고가 없어진 곳: ${updatedEmpty}곳
+							""".trimIndent()
 
 							loc.users.forEach {
 								this@MaskBot.execute(SendMessage(it.chatId, message))
